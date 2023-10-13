@@ -1,5 +1,6 @@
 package com.iue.projectgastosapp.views.startscreens
 
+import android.util.Patterns
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -29,12 +30,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.iue.projectgastosapp.R
+import com.iue.projectgastosapp.navigation.Routes
+import com.iue.projectgastosapp.views.composable.ShowDialog
 import com.iue.projectgastosapp.views.composable.TopBar
 
 @Composable
@@ -51,16 +56,22 @@ fun RegisterScreen(navController: NavController) {
             contentDescription = "Registro",
             onClickDrawer = { navController.popBackStack() }
         )
-        BottomContentRegister()
+        BottomContentRegister(navController)
     }
 }
 
 @Composable
-fun BottomContentRegister() {
+fun BottomContentRegister(navController: NavController) {
     var nombres by remember { mutableStateOf("") }
     var apellidos by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var reEmail by remember { mutableStateOf("") }
+    var isNameValid by remember { mutableStateOf(true) }
+    var isLastNameValid by remember { mutableStateOf(true) }
+    var isEmailValid by remember { mutableStateOf(true) }
+    var isReEmailValid by remember { mutableStateOf(true) }
+    var showDialog by remember { mutableStateOf(false) }
+    var message by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
@@ -74,44 +85,73 @@ fun BottomContentRegister() {
         )
         OutlinedTextField(
             value = nombres,
-            onValueChange = { nombres = it },
+            onValueChange = {
+                nombres = it
+                isNameValid = it.isNotEmpty()
+            },
             label = { Text("Nombres") },
+            isError = !isNameValid,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 10.dp)
         )
         OutlinedTextField(
             value = apellidos,
-            onValueChange = { apellidos = it },
+            onValueChange = {
+                apellidos = it
+                isLastNameValid = it.isNotEmpty()
+            },
             label = { Text("Apellidos") },
+            isError = !isLastNameValid,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 10.dp)
         )
         OutlinedTextField(
             value = email,
-            onValueChange = { email = it },
+            onValueChange = {
+                email = it
+                isEmailValid = Patterns.EMAIL_ADDRESS.matcher(it).matches()
+            },
             label = { Text("Correo electrónico") },
             keyboardOptions = KeyboardOptions.Default.copy(
                 keyboardType = KeyboardType.Email
             ),
+            isError = !isEmailValid,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 10.dp)
         )
         OutlinedTextField(
             value = reEmail,
-            onValueChange = { reEmail = it },
+            onValueChange = {
+                reEmail = it
+                isReEmailValid = Patterns.EMAIL_ADDRESS.matcher(it).matches() && it == email
+            },
             label = { Text("Repita el correo electrónico") },
             keyboardOptions = KeyboardOptions.Default.copy(
                 keyboardType = KeyboardType.Email
             ),
+            isError = !isReEmailValid,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 10.dp)
         )
         Button(
-            onClick = { /* Acción al hacer clic en el botón */ },
+            onClick = {
+                if (nombres.isNotEmpty() && apellidos.isNotEmpty() && email.isNotEmpty() &&
+                    reEmail.isNotEmpty() && isNameValid && isLastNameValid && isEmailValid &&
+                    isReEmailValid
+                ) {
+                    val routeRegisterPinScreen =
+                        "${Routes.CreatePinScreen.route}/$nombres/$apellidos/$email/false"
+                    navController.navigate(routeRegisterPinScreen)
+                } else {
+                    message = "Por favor corrija los datos sumministrados"
+                    showDialog = true
+                }
+                
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 30.dp),
@@ -132,7 +172,9 @@ fun BottomContentRegister() {
                 .align(Alignment.CenterHorizontally)
         )
         Button(
-            onClick = { /* Acción al hacer clic en el botón */ },
+            onClick = {
+
+            },
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.surface)
                 .border(1.dp, Color(0xFFE0E0E0), CircleShape)
@@ -158,4 +200,16 @@ fun BottomContentRegister() {
             }
         }
     }
+    ShowDialog(
+        show = showDialog,
+        message = message,
+        onDismiss = { showDialog = false },
+        onButtonClick = { showDialog = false }
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewRegisterScreen() {
+    RegisterScreen(navController = NavController(LocalContext.current))
 }

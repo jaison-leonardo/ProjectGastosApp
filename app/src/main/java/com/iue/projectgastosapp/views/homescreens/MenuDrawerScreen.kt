@@ -23,14 +23,21 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.iue.projectgastosapp.R
 import com.iue.projectgastosapp.ui.theme.BackgroundColor
 import com.iue.projectgastosapp.views.composable.TopBar
+import com.iue.projectgastosapp.views.startscreens.DataUser
 import kotlinx.coroutines.launch
 
 
 @Composable
-fun MenuDrawerScreen(profileImage: Painter, nameUser: String, emailUser: String) {
+fun MenuDrawerScreen(
+    profileImage: Painter,
+    navController: NavHostController,
+    dataUser: DataUser
+) {
     val drawerState = rememberDrawerState(DrawerValue.Open)
     val scope = rememberCoroutineScope()
     val itemsList = getDrawerItems()
@@ -48,7 +55,11 @@ fun MenuDrawerScreen(profileImage: Painter, nameUser: String, emailUser: String)
                 ) {
 
                     item {
-                        UserContent(profileImage, nameUser, emailUser)
+                        UserContent(
+                            profileImage,
+                            "${dataUser.name} ${dataUser.lastName}",
+                            dataUser.email
+                        )
                     }
                     items(itemsList) { item ->
                         NavigationListItem(
@@ -84,9 +95,9 @@ fun MenuDrawerScreen(profileImage: Painter, nameUser: String, emailUser: String)
 @Preview(showBackground = true)
 @Composable
 fun MenuDrawerScreenPreview() {
+    val navController = rememberNavController()
     val profileImage = painterResource(id = R.drawable.logo)
-    val nameUser = "Jaison Arboleda"
-    val emailUser = "jaison@correo.com"
-    MenuDrawerScreen(profileImage, nameUser, emailUser)
+    val userData = DataUser("Jaison Arboleda\"", "Doe", "jaison@correo.com", true)
+    MenuDrawerScreen(profileImage, navController = navController, dataUser = userData)
 }
 

@@ -8,18 +8,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowRight
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -27,12 +24,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.ktx.database
+import com.google.firebase.ktx.Firebase
 import com.iue.projectgastosapp.navigation.Routes
+import com.iue.projectgastosapp.views.composable.ShowDialog
 import com.iue.projectgastosapp.views.composable.TopContentStart
 
 @Composable
@@ -89,13 +91,23 @@ fun BottomContentLogin(navController: NavController) {
 
         Button(
             onClick = {
-                if (email.isNotEmpty() && isEmailValid && checkIfEmailExists(email)) {
-                    val dataUser = getDataUser(email)
-                    val routeLoginPinScreen =
-                        "${Routes.LoginPinScreen.route}/" +
-                                "${dataUser.name}/${dataUser.lastName}/${dataUser.email}/" +
-                                "${dataUser.isAuth}"
-                    navController.navigate(routeLoginPinScreen)
+                if (email.isNotEmpty() && isEmailValid) {
+                    checkIfEmailExists(email) { isSuccess ->
+                        if (isSuccess) {
+                            getDataUser(email) { dataUser ->
+                                if (dataUser != null) {
+                                    val routeLoginPinScreen =
+                                        "${Routes.LoginPinScreen.route}/" +
+                                                "${dataUser.name}/${dataUser.lastName}/${dataUser.email}/" +
+                                                "${dataUser.isAuth}"
+                                    navController.navigate(routeLoginPinScreen)
+                                }
+                            }
+
+                        } else {
+                            showDialog = true
+                        }
+                    }
                 } else {
                     showDialog = true
                 }
@@ -139,38 +151,44 @@ fun BottomContentLogin(navController: NavController) {
     )
 }
 
-private fun checkIfEmailExists(email: String): Boolean {
-    // Ir a firebase y verificar si el correo existe
-    return true
-}
-
-private fun getDataUser(email: String): DataUser {
-    // Ir a firebase y obtener los datos del usuario
-    return DataUser("Jaison", "Arboleda", email, false)
-}
-
-@Composable
-fun ShowDialog(show: Boolean, message: String, onDismiss: () -> Unit, onButtonClick: () -> Unit) {
-    if (show) {
-        AlertDialog(
-            onDismissRequest = { onDismiss() },
-            confirmButton = {
-                TextButton(onClick = { onButtonClick() }) {
-                    Text("Aceptar")
+private fun checkIfEmailExists(email: String, callback: (Boolean) -> Unit) {
+    Firebase.auth.fetchSignInMethodsForEmail(email)
+        .addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val result = task.result?.signInMethods
+                if (result != null) {
+                    callback(true)
+                } else {
+                    callback(false)
                 }
-            },
-            title = { Text("") },
-            text = { Text(message) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentSize()
-        )
-    }
+            }
+        }
 }
 
+private fun getDataUser(email: String, callback: (DataUser?) -> Unit) {
+    // Ir a firebase y obtener los datos del usuario
+    val dbReference = Firebase.database.reference.child("users")
+    dbReference.orderByChild("email").equalTo(email)
+        .addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+                    val userSnapshot = snapshot.children.first()
+                    callback(
+                        DataUser(
+                            name = userSnapshot.child("name").value.toString(),
+                            lastName = userSnapshot.child("lastName").value.toString(),
+                            email = userSnapshot.child("email").value.toString(),
+                            isAuth = userSnapshot.child("isAuth").value.toString().toBoolean()
+                        )
+                    )
+                } else {
+                    // No existe el usuario
+                    callback(null)
+                }
+            }
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewLoginScreen() {
-    LoginScreen(navController = NavController(LocalContext.current))
+            override fun onCancelled(error: DatabaseError) {
+                callback(null)
+            }
+        })
 }

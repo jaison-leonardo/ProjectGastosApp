@@ -15,7 +15,7 @@ import com.iue.projectgastosapp.views.composable.ComponentPin
 import com.iue.projectgastosapp.views.composable.TopBar
 
 @Composable
-fun CrearPinScreen(navController: NavController) {
+fun CreatePinScreen(navController: NavController, dataUser: DataUser) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -31,7 +31,9 @@ fun CrearPinScreen(navController: NavController) {
             title = "Crear PIN",
             subtitle = "Por favor ingrese su nuevo PIN",
             paddingTop = 100,
-            validatePin = true
+            validatePin = true,
+            navController = navController,
+            dataUser = dataUser
         )
     }
 }
@@ -42,5 +44,5 @@ fun CrearPinScreen(navController: NavController) {
 @Composable
 fun CrearPinScreenPreview() {
     val navController = rememberNavController()
-    CrearPinScreen(navController)
+    CreatePinScreen(navController, DataUser("","","",false))
 }

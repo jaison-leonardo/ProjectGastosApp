@@ -6,9 +6,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.iue.projectgastosapp.views.composable.ComponentPin
 import com.iue.projectgastosapp.views.composable.TopContentStart
 
@@ -25,17 +23,8 @@ fun LoginPinScreen(navController: NavController, dataUser: DataUser) {
             subtitle = "Antes de continuar ingrese su PIN",
             paddingTop = 10,
             validatePin = false,
-            dataUser = dataUser
+            dataUser = dataUser,
+            navController = navController
         )
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun LoginPinScreenPreview() {
-    val navController = rememberNavController()
-    LoginPinScreen(
-        navController = navController,
-        dataUser = DataUser("Jhon", "Doe", "jaison@jaison.com", false)
-    )
 }
