@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavController
+import com.iue.projectgastosapp.firebase.dataobjects.DataUser
 import com.iue.projectgastosapp.views.composable.ComponentPin
 import com.iue.projectgastosapp.views.composable.TopContentStart
 

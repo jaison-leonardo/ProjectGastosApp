@@ -54,7 +54,7 @@ fun TopBar(
         Text(
             text = title,
             color = Color.White,
-            style = MaterialTheme.typography.headlineLarge,
+            style = MaterialTheme.typography.titleLarge,
             modifier = Modifier
                 .align(Alignment.Center)
         )
@@ -77,7 +77,13 @@ fun TopBarApp(
     contentDescription: String
 ) {
     TopAppBar(
-        title = { Text(text = title) },
+        title = {
+            Text(
+                text = title,
+                color = Color.White,
+                style = MaterialTheme.typography.titleLarge,
+            )
+        },
         navigationIcon = {
             IconButton(
                 onClick = { onClickDrawer() }) {
@@ -106,7 +112,7 @@ fun TopBarApp(
 @Composable
 fun TopBarPreview() {
     TopBar(
-        title = "TopBar",
+        title = "Notificaciones y Alertas",
         icon = Icons.Default.ArrowBack,
         contentDescription = "ArrowBack",
         onClickDrawer = {})
@@ -115,5 +121,10 @@ fun TopBarPreview() {
 @Preview(showBackground = true)
 @Composable
 fun TopBarAppPreview() {
-    TopBarApp(title = "TopBar", icon = Icons.Default.ArrowBack, contentDescription = "ArrowBack")
+    TopBarApp(
+        title = "Notificaciones y Alertas",
+        icon = Icons.Default.ArrowBack,
+        contentDescription = "ArrowBack"
+    )
 }
+

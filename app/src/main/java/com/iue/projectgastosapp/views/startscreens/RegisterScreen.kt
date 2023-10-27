@@ -30,14 +30,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.iue.projectgastosapp.R
+import com.iue.projectgastosapp.firebase.functions.checkIfEmailExists
 import com.iue.projectgastosapp.navigation.Routes
 import com.iue.projectgastosapp.views.composable.ShowDialog
 import com.iue.projectgastosapp.views.composable.TopBar
@@ -143,14 +142,20 @@ fun BottomContentRegister(navController: NavController) {
                     reEmail.isNotEmpty() && isNameValid && isLastNameValid && isEmailValid &&
                     isReEmailValid
                 ) {
-                    val routeRegisterPinScreen =
-                        "${Routes.CreatePinScreen.route}/$nombres/$apellidos/$email/false"
-                    navController.navigate(routeRegisterPinScreen)
+                    checkIfEmailExists(email) { exists, messageEmail ->
+                        if (exists) {
+                            message = messageEmail
+                            showDialog = true
+                        } else {
+                            val routeRegisterPinScreen =
+                                "${Routes.CreatePinScreen.route}//$nombres/$apellidos/$email"
+                            navController.navigate(routeRegisterPinScreen)
+                        }
+                    }
                 } else {
-                    message = "Por favor corrija los datos sumministrados"
+                    message = "Por favor corrija los datos suministrados"
                     showDialog = true
                 }
-                
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -206,10 +211,4 @@ fun BottomContentRegister(navController: NavController) {
         onDismiss = { showDialog = false },
         onButtonClick = { showDialog = false }
     )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewRegisterScreen() {
-    RegisterScreen(navController = NavController(LocalContext.current))
 }

@@ -8,14 +8,16 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
+import com.iue.projectgastosapp.firebase.dataobjects.DataUser
 import com.iue.projectgastosapp.views.composable.ComponentPin
 import com.iue.projectgastosapp.views.composable.TopBar
 
 @Composable
-fun CreatePinScreen(navController: NavController, dataUser: DataUser) {
+fun CreatePinScreen(
+    navController: NavController,
+    dataUser: DataUser
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -36,13 +38,4 @@ fun CreatePinScreen(navController: NavController, dataUser: DataUser) {
             dataUser = dataUser
         )
     }
-}
-
-
-
-@Preview(showBackground = true)
-@Composable
-fun CrearPinScreenPreview() {
-    val navController = rememberNavController()
-    CreatePinScreen(navController, DataUser("","","",false))
 }

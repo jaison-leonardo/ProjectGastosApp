@@ -1,4 +1,4 @@
-package com.iue.projectgastosapp.views.homescreens
+package com.iue.projectgastosapp.views.composable.home.menudrawer
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.padding

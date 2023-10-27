@@ -1,5 +1,6 @@
 package com.iue.projectgastosapp.views.startscreens
 
+import android.util.Log
 import android.util.Patterns
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -27,12 +28,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.ValueEventListener
-import com.google.firebase.database.ktx.database
-import com.google.firebase.ktx.Firebase
+import com.iue.projectgastosapp.firebase.functions.checkIfEmailExists
+import com.iue.projectgastosapp.firebase.functions.getDataUserByEmail
 import com.iue.projectgastosapp.navigation.Routes
 import com.iue.projectgastosapp.views.composable.ShowDialog
 import com.iue.projectgastosapp.views.composable.TopContentStart
@@ -56,6 +53,7 @@ fun BottomContentLogin(navController: NavController) {
     var email by remember { mutableStateOf("") }
     var isEmailValid by remember { mutableStateOf(true) }
     var showDialog by remember { mutableStateOf(false) }
+    var message by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
@@ -92,23 +90,27 @@ fun BottomContentLogin(navController: NavController) {
         Button(
             onClick = {
                 if (email.isNotEmpty() && isEmailValid) {
-                    checkIfEmailExists(email) { isSuccess ->
-                        if (isSuccess) {
-                            getDataUser(email) { dataUser ->
+                    checkIfEmailExists(email) { exists, messageEmail ->
+                        if (exists) {
+                            getDataUserByEmail(email) { dataUser, messageUser ->
                                 if (dataUser != null) {
                                     val routeLoginPinScreen =
                                         "${Routes.LoginPinScreen.route}/" +
-                                                "${dataUser.name}/${dataUser.lastName}/${dataUser.email}/" +
-                                                "${dataUser.isAuth}"
+                                                "${dataUser.id}/${dataUser.name}/${dataUser.lastName}/${dataUser.email}"
+                                    Log.i("routeLoginPinScreen", routeLoginPinScreen)
                                     navController.navigate(routeLoginPinScreen)
+                                } else {
+                                    showDialog = true
+                                    message = messageUser
                                 }
                             }
-
                         } else {
                             showDialog = true
+                            message = messageEmail
                         }
                     }
                 } else {
+                    message = "El correo electrónico no es válido"
                     showDialog = true
                 }
             },
@@ -145,50 +147,8 @@ fun BottomContentLogin(navController: NavController) {
     }
     ShowDialog(
         show = showDialog,
-        message = "Correo electrónico no válido",
+        message = message,
         onDismiss = { showDialog = false },
         onButtonClick = { showDialog = false }
     )
-}
-
-private fun checkIfEmailExists(email: String, callback: (Boolean) -> Unit) {
-    Firebase.auth.fetchSignInMethodsForEmail(email)
-        .addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                val result = task.result?.signInMethods
-                if (result != null) {
-                    callback(true)
-                } else {
-                    callback(false)
-                }
-            }
-        }
-}
-
-private fun getDataUser(email: String, callback: (DataUser?) -> Unit) {
-    // Ir a firebase y obtener los datos del usuario
-    val dbReference = Firebase.database.reference.child("users")
-    dbReference.orderByChild("email").equalTo(email)
-        .addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                if (snapshot.exists()) {
-                    val userSnapshot = snapshot.children.first()
-                    callback(
-                        DataUser(
-                            name = userSnapshot.child("name").value.toString(),
-                            lastName = userSnapshot.child("lastName").value.toString(),
-                            email = userSnapshot.child("email").value.toString(),
-                            isAuth = userSnapshot.child("isAuth").value.toString().toBoolean()
-                        )
-                    )
-                } else {
-                    // No existe el usuario
-                    callback(null)
-                }
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                callback(null)
-            }
-        })
 }

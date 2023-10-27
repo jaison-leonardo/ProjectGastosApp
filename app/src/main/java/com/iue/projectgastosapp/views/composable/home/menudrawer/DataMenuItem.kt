@@ -1,4 +1,4 @@
-package com.iue.projectgastosapp.views.homescreens
+package com.iue.projectgastosapp.views.composable.home.menudrawer
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -17,14 +17,26 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import com.iue.projectgastosapp.R
+import com.iue.projectgastosapp.firebase.dataobjects.DataUser
+import com.iue.projectgastosapp.navigation.Routes
+import com.iue.projectgastosapp.views.sescreens.BackupScreen
+import com.iue.projectgastosapp.views.sescreens.BudgetScreen
+import com.iue.projectgastosapp.views.sescreens.ExpensesScreen
+import com.iue.projectgastosapp.views.sescreens.HomeScreen
+import com.iue.projectgastosapp.views.sescreens.NotificationScreen
+import com.iue.projectgastosapp.views.sescreens.ReportsScreen
+import com.iue.projectgastosapp.views.sescreens.SavingsGoalsScreen
+import com.iue.projectgastosapp.views.sescreens.SecurityScreen
 
 
 data class MenuItem(
     val id: String,
     val title: String,
     val contentDescription: String,
-    val icon: Painter
+    val icon: Painter,
+    val screen: @Composable (NavHostController, DataUser) -> Unit
 )
 
 @Composable
@@ -71,55 +83,71 @@ fun getDrawerItems(): List<MenuItem> {
             id = "home",
             title = "Inicio",
             contentDescription = "go to screen home",
-            icon = painterResource(id = R.drawable.home_48)
+            icon = painterResource(id = R.drawable.home_48),
+            screen = { _, dataUser -> HomeScreen(dataUser) }
         ),
         MenuItem(
             id = "gastos",
             title = "Registro de Gastos",
             contentDescription = "go to screen expenses",
-            icon = painterResource(id = R.drawable.outline_payments_48)
+            icon = painterResource(id = R.drawable.outline_payments_48),
+            screen = { _, dataUser -> ExpensesScreen(dataUser) }
         ),
         MenuItem(
             id = "presupuesto",
             title = "Presupuesto Mensual",
             contentDescription = "go to screen budget",
-            icon = painterResource(id = R.drawable.budget_48)
+            icon = painterResource(id = R.drawable.budget_48),
+            screen = { _, dataUser -> BudgetScreen(dataUser) }
         ),
         MenuItem(
             id = "reportes",
             title = "Análisis y Reportes",
             contentDescription = "go to screen reports",
-            icon = painterResource(id = R.drawable.report_48)
+            icon = painterResource(id = R.drawable.report_48),
+            screen = { _, _ -> ReportsScreen() }
         ),
         MenuItem(
             id = "notificaciones",
             title = "Notificaciones y Alertas",
             contentDescription = "go to screen notifications",
-            icon = painterResource(id = R.drawable.notifications_48)
+            icon = painterResource(id = R.drawable.notifications_48),
+            screen = { _, _ -> NotificationScreen() }
         ),
         MenuItem(
             id = "ahorro",
             title = "Metas de ahorro",
             contentDescription = "go to screen goals",
-            icon = painterResource(id = R.drawable.goals_48)
+            icon = painterResource(id = R.drawable.goals_48),
+            screen = { _, datauser -> SavingsGoalsScreen(datauser) }
         ),
         MenuItem(
             id = "seguridad",
             title = "Seguridad y Privacidad",
             contentDescription = "go to screen security",
-            icon = painterResource(id = R.drawable.security_48)
+            icon = painterResource(id = R.drawable.security_48),
+            screen = { _, _ -> SecurityScreen() }
         ),
         MenuItem(
             id = "backup",
             title = "Respaldo de datos",
             contentDescription = "go to screen backup",
-            icon = painterResource(id = R.drawable.backup_48)
+            icon = painterResource(id = R.drawable.backup_48),
+            screen = { _, _ -> BackupScreen() }
         ),
         MenuItem(
             id = "logout",
             title = "Cerrar sesión",
             contentDescription = "go to screen logout",
-            icon = painterResource(id = R.drawable.logout_48)
+            icon = painterResource(id = R.drawable.logout_48),
+            screen = { navController, _ ->
+                navController.navigate(Routes.LoginScreen.route)
+            }
         )
     )
+}
+
+@Composable
+fun getMenuItemById(id: String): MenuItem {
+    return getDrawerItems().find { it.id == id }!!
 }

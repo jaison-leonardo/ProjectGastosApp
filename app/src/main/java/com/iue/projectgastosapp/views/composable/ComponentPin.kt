@@ -24,11 +24,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.database.ktx.database
-import com.google.firebase.ktx.Firebase
+import com.iue.projectgastosapp.firebase.dataobjects.DataUser
+import com.iue.projectgastosapp.firebase.functions.createAccount
+import com.iue.projectgastosapp.firebase.functions.validatePinByEmail
 import com.iue.projectgastosapp.navigation.Routes
-import com.iue.projectgastosapp.views.startscreens.DataUser
 
 @Composable
 fun ComponentPin(
@@ -88,18 +87,17 @@ fun ComponentPin(
                                 message = "PIN creado correctamente"
                                 // Navegar hasta la pantalla de login
                                 isLoading = true
-                                createAccount(dataUser!!, pinValue) { isSuccess ->
+                                createAccount(dataUser!!, pinValue) { isSuccess, response ->
                                     isLoading = false
                                     if (isSuccess) {
                                         // Navegar hasta la pantalla de inicio
                                         navController.navigate(Routes.LoginScreen.route)
                                     } else {
                                         // Mostrar mensaje de error
-                                        message = "Error al crear la cuenta"
+                                        message = response
                                         showDialog = true
                                     }
                                 }
-
                             } else {
                                 // Mostrar mensaje de error por no coincidir y regresar
                                 message = "PIN no coincide"
@@ -117,19 +115,23 @@ fun ComponentPin(
                     }
                 } else {
                     if (pinValue.isNotEmpty()) {
-                        validatePinByEmail(dataUser, pinValue) { isSuccess ->
-                            if (isSuccess) {
-                                // Navegar hasta la pantalla de inicio
-                                val routeMenuDrawerScreen =
-                                    "${Routes.MenuDrawerScreen.route}/${dataUser?.name}/" +
-                                            "${dataUser?.lastName}/${dataUser?.email}/" +
-                                            "${dataUser?.isAuth}"
-                                navController.navigate(routeMenuDrawerScreen)
-                            } else {
-                                // Mostrar mensaje de error por vacio o no coincidir
-                                message = "PIN incorrecto"
-                                showDialog = true
+                        if (dataUser != null) {
+                            validatePinByEmail(dataUser.email, pinValue) { isSuccess, response ->
+                                if (isSuccess) {
+                                    // Navegar hasta la pantalla de inicio
+                                    val routeMenuDrawerScreen =
+                                        "${Routes.MenuDrawerScreen.route}/${dataUser.id}/${dataUser.name}/" +
+                                                "${dataUser.lastName}/${dataUser.email}"
+                                    navController.navigate(routeMenuDrawerScreen)
+                                } else {
+                                    // Mostrar mensaje de error por vacio o no coincidir
+                                    message = response
+                                    showDialog = true
+                                }
                             }
+                        }else {
+                            message = "Error al obtener los datos del usuario"
+                            showDialog = true
                         }
                     } else {
                         // Mostrar mensaje de error por vacio o no coincidir
@@ -168,42 +170,5 @@ fun ComponentPin(
     }
 }
 
-// Crear cuenta en firebase
-fun createAccount(dataUser: DataUser, pinValue: String, callback: (Boolean) -> Unit) {
-    Firebase.auth.createUserWithEmailAndPassword(dataUser.email, pinValue)
-        .addOnCompleteListener { createAuth ->
-            if (createAuth.isSuccessful) {
-                val userUid = createAuth.result?.user?.uid
-                if (userUid != null) {
-                    val bd = Firebase.database.reference
-                    bd.child("users").child(userUid).setValue(dataUser)
-                        .addOnCompleteListener() { createDatauser ->
-                            if (createDatauser.isSuccessful) {
-                                callback(true)
-                            } else {
-                                callback(false)
-                            }
-                        }
-                } else {
-                    callback(false)
-                }
-            } else {
-                callback(false)
-            }
-        }
-}
 
-fun validatePinByEmail(dataUser: DataUser?, pinValue: String, callback: (Boolean) -> Unit) {
-    if (dataUser != null) {
-        Firebase.auth.signInWithEmailAndPassword(dataUser.email, pinValue)
-            .addOnCompleteListener { signIn ->
-                if (signIn.isSuccessful) {
-                    callback(true)
-                } else {
-                    callback(false)
-                }
-            }
-    } else {
-        callback(false)
-    }
-}
+
