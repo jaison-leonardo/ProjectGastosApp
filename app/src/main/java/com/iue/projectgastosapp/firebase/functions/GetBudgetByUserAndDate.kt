@@ -5,6 +5,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import com.iue.projectgastosapp.enums.Objects
 import com.iue.projectgastosapp.firebase.dataobjects.DataPresupuesto
 import com.iue.projectgastosapp.utils.getDateObjFromString
 import com.iue.projectgastosapp.utils.getFirstDayOfMonth
@@ -19,13 +20,13 @@ fun getBudgetByUserAndDate(
     callback: (DataPresupuesto?, String) -> Unit
 ) {
     val budgetReference = Firebase.database.reference
-        .child("users")
+        .child(Objects.USUARIOS.label)
         .child(userId)
-        .child("presupuestos")
+        .child(Objects.PRESUPUESTOS.label)
 
     budgetReference.addListenerForSingleValueEvent(object : ValueEventListener {
         override fun onDataChange(snapshot: DataSnapshot) {
-            var budgetCurrent: DataPresupuesto? = null
+            var budgetCurrent: DataPresupuesto?
             if (snapshot.exists()) {
                 budgetCurrent = findBudgetForDate(snapshot, dateToCheck)
                 if (budgetCurrent != null) {

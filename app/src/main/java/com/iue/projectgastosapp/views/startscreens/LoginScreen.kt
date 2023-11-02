@@ -31,6 +31,7 @@ import androidx.navigation.NavController
 import com.iue.projectgastosapp.firebase.functions.checkIfEmailExists
 import com.iue.projectgastosapp.firebase.functions.getDataUserByEmail
 import com.iue.projectgastosapp.navigation.Routes
+import com.iue.projectgastosapp.views.composable.ShowCircularIndicator
 import com.iue.projectgastosapp.views.composable.ShowDialog
 import com.iue.projectgastosapp.views.composable.TopContentStart
 
@@ -53,6 +54,7 @@ fun BottomContentLogin(navController: NavController) {
     var email by remember { mutableStateOf("") }
     var isEmailValid by remember { mutableStateOf(true) }
     var showDialog by remember { mutableStateOf(false) }
+    var showCircularIndicator by remember { mutableStateOf(false) }
     var message by remember { mutableStateOf("") }
 
     Column(
@@ -90,9 +92,11 @@ fun BottomContentLogin(navController: NavController) {
         Button(
             onClick = {
                 if (email.isNotEmpty() && isEmailValid) {
+                    showCircularIndicator = true
                     checkIfEmailExists(email) { exists, messageEmail ->
                         if (exists) {
                             getDataUserByEmail(email) { dataUser, messageUser ->
+                                showCircularIndicator = false
                                 if (dataUser != null) {
                                     val routeLoginPinScreen =
                                         "${Routes.LoginPinScreen.route}/" +
@@ -105,6 +109,7 @@ fun BottomContentLogin(navController: NavController) {
                                 }
                             }
                         } else {
+                            showCircularIndicator = false
                             showDialog = true
                             message = messageEmail
                         }
@@ -145,6 +150,7 @@ fun BottomContentLogin(navController: NavController) {
                     .padding(start = 4.dp))
         }
     }
+    ShowCircularIndicator(show = showCircularIndicator)
     ShowDialog(
         show = showDialog,
         message = message,

@@ -2,6 +2,7 @@ package com.iue.projectgastosapp.firebase.functions
 
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import com.iue.projectgastosapp.enums.Objects
 import com.iue.projectgastosapp.firebase.dataobjects.DataMetaAhorro
 import com.iue.projectgastosapp.utils.getFirstDayOfMonth
 import com.iue.projectgastosapp.utils.getFormattedDate
@@ -15,23 +16,30 @@ fun createMetaByUser(
     categoria: String,
     callback: (Boolean, String) -> Unit
 ) {
-    val bd = Firebase.database.reference
-    bd.child("users").child(userMeta).child("metas")
-        .child((idMeta).toString())
+    val reference = Firebase.database.reference
+        .child(Objects.USUARIOS.label)
+        .child(userMeta)
+        .child(Objects.METAS.label)
+    val metaId = (idMeta).toString()
+    reference
+        .child(metaId)
         .updateChildren(mapOf(categoria to meta))
         .addOnCompleteListener { createMeta ->
             if (createMeta.isSuccessful) {
-                bd.child("users").child(userMeta).child("metas")
-                    .child((idMeta).toString()).child("fechaMes")
-                    .setValue(
-                        getFormattedDate(
-                            sumarDiasAFecha(getFirstDayOfMonth(Date()), 5),
-                            "yyyy-MM-dd"
-                        )
-                    )
+                setMetaFecha(userMeta, metaId)
                 callback(true, "Meta creada correctamente")
             } else {
                 callback(false, "Error al crear la meta")
             }
         }
+}
+
+private fun setMetaFecha(userMeta: String, metaId: String) {
+    val fechaMesPath = "${Objects.USUARIOS.label}/$userMeta/${Objects.METAS.label}/$metaId/fechaMes"
+    val fechaMesValue = getFormattedDate(
+        sumarDiasAFecha(getFirstDayOfMonth(Date()), 5),
+        "yyyy-MM-dd"
+    )
+
+    Firebase.database.reference.child(fechaMesPath).setValue(fechaMesValue)
 }

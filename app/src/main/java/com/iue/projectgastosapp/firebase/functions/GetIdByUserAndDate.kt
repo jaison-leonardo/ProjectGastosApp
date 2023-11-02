@@ -5,6 +5,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import com.iue.projectgastosapp.enums.Objects
 import com.iue.projectgastosapp.utils.getDateObjFromString
 import com.iue.projectgastosapp.utils.getFirstDayOfMonth
 import com.iue.projectgastosapp.utils.getLastDayOfMonth
@@ -13,16 +14,16 @@ import java.util.Date
 
 fun getIdByUserAndDate(userId: String, dateToCheck: Date, callback: (Int?, String) -> Unit) {
     val metasReference = Firebase.database.reference
-        .child("users")
+        .child(Objects.USUARIOS.label)
         .child(userId)
-        .child("metas")
+        .child(Objects.METAS.label)
 
     metasReference.addListenerForSingleValueEvent(object : ValueEventListener {
         override fun onDataChange(snapshot: DataSnapshot) {
             if (snapshot.exists()) {
                 var metaId: Int? = null
                 var isdate = false
-                for (metaSnapshot in snapshot.children) {
+                snapshot.children.forEach { metaSnapshot ->
                     val fechaPresupuesto = metaSnapshot.child("fechaMes").value.toString()
                     val fechaPresupuestoMin =
                         getFirstDayOfMonth(
@@ -35,19 +36,10 @@ fun getIdByUserAndDate(userId: String, dateToCheck: Date, callback: (Int?, Strin
                     if (isDateInRange(dateToCheck, fechaPresupuestoMin, fechaPresupuestoMax)) {
                         isdate = true
                         metaId = metaSnapshot.key?.toIntOrNull()
-                        break
                     }
-                    val expenseNumber = metaSnapshot.key?.toIntOrNull()
-
-                    if ((expenseNumber != null) && ((metaId == null) || (expenseNumber > metaId))) {
-                        metaId = expenseNumber
-                    }
+                    metaId = maxOf(metaId ?: 0, metaSnapshot.key?.toIntOrNull() ?: 0)
                 }
-                if (metaId != null) {
-                    callback(if (isdate) metaId else metaId + 1, "metaId")
-                } else {
-                    callback(null, "")
-                }
+                callback(if (isdate) metaId else metaId?.plus(1), "metaId")
             } else {
                 callback(1, "No hay datos de metas para este usuario")
             }
@@ -59,3 +51,4 @@ fun getIdByUserAndDate(userId: String, dateToCheck: Date, callback: (Int?, Strin
         }
     })
 }
+

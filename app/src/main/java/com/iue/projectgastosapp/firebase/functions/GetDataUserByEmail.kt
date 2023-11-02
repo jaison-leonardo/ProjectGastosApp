@@ -5,11 +5,13 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import com.iue.projectgastosapp.enums.Objects
 import com.iue.projectgastosapp.firebase.dataobjects.DataUser
 
 fun getDataUserByEmail(email: String, callback: (DataUser?, String) -> Unit) {
     // Ir a firebase y obtener los datos del usuario
-    val dbReference = Firebase.database.reference.child("users")
+    val dbReference = Firebase.database.reference
+        .child(Objects.USUARIOS.label)
     dbReference.orderByChild("email").equalTo(email)
         .addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {

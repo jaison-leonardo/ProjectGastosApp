@@ -2,6 +2,7 @@ package com.iue.projectgastosapp.firebase.functions
 
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import com.iue.projectgastosapp.enums.Objects
 import com.iue.projectgastosapp.firebase.dataobjects.DataGasto
 
 fun createGastoByUser(
@@ -10,8 +11,11 @@ fun createGastoByUser(
     gasto: DataGasto,
     callback: (Boolean, String) -> Unit
 ) {
-    val bd = Firebase.database.reference
-    bd.child("users").child(userGasto).child("gastos")
+    val reference = Firebase.database.reference
+        .child(Objects.USUARIOS.label)
+        .child(userGasto)
+        .child(Objects.GASTOS.label)
+    reference
         .child((idGasto + 1).toString())
         .setValue(gasto)
         .addOnCompleteListener { createGasto ->

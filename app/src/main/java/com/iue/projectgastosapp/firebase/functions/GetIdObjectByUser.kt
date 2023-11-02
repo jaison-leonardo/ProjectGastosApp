@@ -5,22 +5,20 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import com.iue.projectgastosapp.enums.Objects
 
 fun getIdObjectByUser(idUser: String, child: String, callback: (Int?, String) -> Unit) {
-    val dbReference = Firebase.database.reference.child("users")
-        .child(idUser).child(child)
+    val dbReference = Firebase.database.reference
+        .child(Objects.USUARIOS.label)
+        .child(idUser)
+        .child(child)
 
     dbReference.addListenerForSingleValueEvent(object : ValueEventListener {
         override fun onDataChange(snapshot: DataSnapshot) {
             if (snapshot.exists()) {
-                var maxExpenseNumber: Int? = null
-                for (expenseSnapshot in snapshot.children) {
-                    val expenseNumber = expenseSnapshot.key?.toIntOrNull()
-
-                    if ((expenseNumber != null) && ((maxExpenseNumber == null) || (expenseNumber > maxExpenseNumber))) {
-                        maxExpenseNumber = expenseNumber
-                    }
-                }
+                val maxExpenseNumber = snapshot.children
+                    .mapNotNull { it.key?.toIntOrNull() }
+                    .maxOrNull()
                 callback(maxExpenseNumber, "$child encontrado")
             } else {
                 callback(0, "No hay datos de $child para este usuario")

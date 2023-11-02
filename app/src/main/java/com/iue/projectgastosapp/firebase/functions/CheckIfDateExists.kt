@@ -5,6 +5,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import com.iue.projectgastosapp.enums.Objects
 import com.iue.projectgastosapp.utils.getDateObjFromString
 import com.iue.projectgastosapp.utils.getFirstDayOfMonth
 import com.iue.projectgastosapp.utils.getLastDayOfMonth
@@ -13,9 +14,9 @@ import java.util.Date
 
 fun checkIfDateExists(userId: String, dateToCheck: Date, callback: (Boolean, String) -> Unit) {
     val budgetReference = Firebase.database.reference
-        .child("users")
+        .child(Objects.USUARIOS.label)
         .child(userId)
-        .child("presupuestos")
+        .child(Objects.PRESUPUESTOS.label)
 
     budgetReference.addListenerForSingleValueEvent(object : ValueEventListener {
         override fun onDataChange(snapshot: DataSnapshot) {
