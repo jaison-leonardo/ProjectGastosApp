@@ -57,7 +57,7 @@ fun getBudgetByUserAndDate(
         }
 
         override fun onCancelled(error: DatabaseError) {
-            callback(null, "")
+            callback(null, "DatabaseError")
         }
     })
 }

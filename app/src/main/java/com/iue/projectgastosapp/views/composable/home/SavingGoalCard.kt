@@ -57,25 +57,25 @@ fun SavingGoalCard(dataUser: DataUser) {
                 CustomProgressBar(
                     label = "Transporte",
                     progress = 25f,
-                    totalValue = metas.find { it.categoriaMeta == "2" }?.montoMeta ?: 0.0,
+                    totalValue = metas.find { it.categoriaMeta == "Transporte" }?.montoMeta ?: 0.0,
                     colors = listOf(Color(0xFF2196F3), Color(0xFF03A9F4))
                 )
                 CustomProgressBar(
                     label = "Entretenimiento",
                     progress = 50f,
-                    totalValue = metas.find { it.categoriaMeta == "3" }?.montoMeta ?: 0.0,
+                    totalValue = metas.find { it.categoriaMeta == "Entretenimiento" }?.montoMeta ?: 0.0,
                     colors = listOf(Color(0xFF0F9D58), Color(0xF055CA4D))
                 )
                 CustomProgressBar(
                     label = "Alimentación",
                     progress = 75f,
-                    totalValue = metas.find { it.categoriaMeta == "1" }?.montoMeta ?: 0.0,
+                    totalValue = metas.find { it.categoriaMeta == "Alimentación" }?.montoMeta ?: 0.0,
                     colors = listOf(Color(0xFFF44336), Color(0xFFE91E63))
                 )
                 CustomProgressBar(
                     label = "Otros",
                     progress = 100f,
-                    totalValue = metas.find { it.categoriaMeta == "4" }?.montoMeta ?: 0.0,
+                    totalValue = metas.find { it.categoriaMeta == "Otros" }?.montoMeta ?: 0.0,
                     colors = listOf(Color(0xFFFFC107), Color(0xFFFF9800))
                 )
             }

@@ -31,7 +31,7 @@ fun getSumatoriaGastosByCategoria(
                 }.toCollection(ArrayList())
                 callback(sumCategoriasList, "Sumatoria de gastos encontrada")
             } else {
-                callback(null, "No se encontraron gastos")
+                callback(arrayListOf(), "No se encontraron gastos")
             }
         }
 

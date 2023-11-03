@@ -54,7 +54,8 @@ fun AppNavigation() {
                 navArgument("email") { type = NavType.StringType }
             )
         ) { backStackEntry ->
-            val idUser = backStackEntry.arguments?.getString("id")
+            var idUser = backStackEntry.arguments?.getString("id")
+            idUser = if (idUser != "null") idUser else ""
             val name = backStackEntry.arguments?.getString("name")
             val lastName = backStackEntry.arguments?.getString("lastName")
             val email = backStackEntry.arguments?.getString("email")

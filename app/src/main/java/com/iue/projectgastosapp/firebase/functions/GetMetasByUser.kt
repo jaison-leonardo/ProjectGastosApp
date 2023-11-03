@@ -44,7 +44,7 @@ fun getMetasByUser(idUser: String, callback: (ArrayList<DataMetaAhorro>?, String
                             }
                     }
                 }
-                callback(metasList.ifEmpty { null }, "Metas encontradas")
+                callback(metasList.ifEmpty { arrayListOf() }, "Metas encontradas")
             } else {
                 callback(arrayListOf(), "No se encontraron metas")
             }

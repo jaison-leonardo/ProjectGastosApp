@@ -53,6 +53,7 @@ import com.iue.projectgastosapp.utils.getLastDayOfMonth
 import com.iue.projectgastosapp.utils.isDateInRange
 import com.iue.projectgastosapp.utils.parseMonetaryValue
 import com.iue.projectgastosapp.utils.sumarDiasAFecha
+import com.iue.projectgastosapp.utils.truncateTimeFromDate
 import com.iue.projectgastosapp.views.composable.CardExpandable
 import com.iue.projectgastosapp.views.composable.ShowDialog
 import me.thekusch.composeview.CurrencyTextField
@@ -211,9 +212,9 @@ fun SavingsGoalsScreen(dataUser: DataUser) {
                         val validateFields = montoCurrencyField.text.isNotEmpty() &&
                                 parseMonetaryValue(montoCurrencyField.text) > 0.0 &&
                                 selectedCategoriaObject != Categories.EMPTY
-                        val fechaSelect = fechaLimite.time
-                        val fechaMin = sumarDiasAFecha(Date(), 1)
-                        val fechaMax = getLastDayOfMonth(fechaLimite.time)
+                        val fechaSelect = truncateTimeFromDate(fechaLimite.time)
+                        val fechaMin = truncateTimeFromDate(Date())
+                        val fechaMax = truncateTimeFromDate(getLastDayOfMonth(fechaLimite.time))
                         val validateDate = isDateInRange(fechaSelect, fechaMin, fechaMax)
                         if (validateFields && validateDate) {
                             for (item in itemsList) {

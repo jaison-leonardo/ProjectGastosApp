@@ -29,6 +29,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,11 +48,11 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.iue.projectgastosapp.enums.Categories
 import com.iue.projectgastosapp.enums.getPresupuestoByCategory
-import com.iue.projectgastosapp.firebase.functions.createGastoByUser
 import com.iue.projectgastosapp.firebase.dataobjects.DataGasto
 import com.iue.projectgastosapp.firebase.dataobjects.DataPresupuesto
 import com.iue.projectgastosapp.firebase.dataobjects.DataUser
 import com.iue.projectgastosapp.firebase.dataobjects.GastosAndCategoria
+import com.iue.projectgastosapp.firebase.functions.createGastoByUser
 import com.iue.projectgastosapp.firebase.functions.getBudgetByUserAndDate
 import com.iue.projectgastosapp.firebase.functions.getGastosByUser
 import com.iue.projectgastosapp.firebase.functions.getIdObjectByUser
@@ -99,39 +100,38 @@ fun ExpensesScreen(dataUser: DataUser) {
     }
     var gastosPorCategoria by remember { mutableStateOf<List<GastosAndCategoria>>(emptyList()) }
     var totalMeta by remember { mutableStateOf(0.0) }
-    var showPresupuesto by remember { mutableStateOf(false) }
-    getBudgetByUserAndDate(dataUser.id, Date()) { presupuestoData, messagePresupuesto ->
-        if (presupuestoData != null) {
-            showPresupuesto = true
-            presupuesto = presupuestoData
-        } else {
-            showDialog = true
-            message = messagePresupuesto
-        }
-    }
-    getMetasByUser(dataUser.id) { metaList, messageMetas ->
-        if (metaList != null) {
-            metaList.forEach {
-                totalMeta += it.montoMeta
+    LaunchedEffect(dataUser.id) {
+        getBudgetByUserAndDate(dataUser.id, Date()) { presupuestoData, messagePresupuesto ->
+            if (presupuestoData != null && messagePresupuesto == "budgetId") {
+                presupuesto = presupuestoData
+            } else if (presupuestoData == null) {
+                showDialog = true
+                message = messagePresupuesto
             }
-        } else {
-            showDialog = true
-            message = messageMetas
         }
-
-    }
-    val categorias = listOf(
-        Categories.ALIMENTACION,
-        Categories.TRANSPORTE,
-        Categories.ENTRETENIMIENTO,
-        Categories.OTROS
-    )
-    getSumatoriaGastosByCategoria(dataUser.id, categorias) { sumatoria, messageCat ->
-        if (sumatoria != null) {
-            gastosPorCategoria = sumatoria
-        } else {
-            showDialog = true
-            message = messageCat
+        getMetasByUser(dataUser.id) { metaList, messageMetas ->
+            if (metaList != null) {
+                metaList.forEach {
+                    totalMeta += it.montoMeta
+                }
+            } else {
+                showDialog = true
+                message = messageMetas
+            }
+        }
+        val categorias = listOf(
+            Categories.ALIMENTACION,
+            Categories.TRANSPORTE,
+            Categories.ENTRETENIMIENTO,
+            Categories.OTROS
+        )
+        getSumatoriaGastosByCategoria(dataUser.id, categorias) { sumatoria, messageCat ->
+            if (sumatoria != null) {
+                gastosPorCategoria = sumatoria
+            } else {
+                showDialog = true
+                message = messageCat
+            }
         }
     }
 
@@ -260,21 +260,33 @@ fun ExpensesScreen(dataUser: DataUser) {
                             && descripcion.isNotEmpty() && selectedCategoriaObject != Categories.EMPTY
                 if (validateFields) {
                     var createGasto = false
-                    gastosPorCategoria.forEach() {
-                        if (it.categoriaId == selectedCategoriaObject.id) {
-                            val totalGasto =
-                                it.gastosSum + parseMonetaryValue(montoCurrencyField.text)
-                            if (totalGasto <= getPresupuestoByCategory(
-                                    presupuesto,
-                                    selectedCategoriaObject
-                                )
-                            ) {
+                    val presupuestoByCategoria = getPresupuestoByCategory(
+                        presupuesto,
+                        selectedCategoriaObject
+                    )
+                    if (gastosPorCategoria.isEmpty() && presupuestoByCategoria > 0.0) {
+                        createGasto = true
+                    } else if (presupuestoByCategoria > 0.0) {
+                        val categoriaSeleccionada = gastosPorCategoria.firstOrNull {
+                            it.categoriaId == selectedCategoriaObject.id
+                        }
+
+                        if (categoriaSeleccionada != null) {
+                            val totalGasto = categoriaSeleccionada.gastosSum + parseMonetaryValue(montoCurrencyField.text)
+
+                            if (totalGasto <= presupuestoByCategoria) {
                                 createGasto = true
                             } else {
                                 message = "Se ha excedido el presupuesto de la categoría"
                                 showDialog = true
                             }
+                        } else {
+                            message = "No existe la categoria seleccionada :o"
+                            showDialog = true
                         }
+                    } else {
+                        message = "No ha definido ningún presupuesto para esta categoría"
+                        showDialog = true
                     }
                     if (createGasto) {
                         getIdObjectByUser(dataUser.id, "gastos") { idGasto, responseId ->

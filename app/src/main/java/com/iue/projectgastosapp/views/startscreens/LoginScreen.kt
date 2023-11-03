@@ -2,6 +2,7 @@ package com.iue.projectgastosapp.views.startscreens
 
 import android.util.Log
 import android.util.Patterns
+import android.view.KeyEvent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowRight
@@ -24,7 +26,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -56,6 +62,8 @@ fun BottomContentLogin(navController: NavController) {
     var showDialog by remember { mutableStateOf(false) }
     var showCircularIndicator by remember { mutableStateOf(false) }
     var message by remember { mutableStateOf("") }
+    val focusManager = LocalFocusManager.current
+
 
     Column(
         modifier = Modifier
@@ -80,13 +88,25 @@ fun BottomContentLogin(navController: NavController) {
                 isEmailValid = Patterns.EMAIL_ADDRESS.matcher(it).matches()
             },
             label = { Text("Correo electrónico") },
+            singleLine = true,
             keyboardOptions = KeyboardOptions.Default.copy(
-                keyboardType = KeyboardType.Email
+                keyboardType = KeyboardType.Email,
+                imeAction = ImeAction.Done
+            ),
+            keyboardActions = KeyboardActions(
+                onDone = { focusManager.clearFocus() }
             ),
             isError = !isEmailValid,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 50.dp)
+                .onKeyEvent {
+                    if (it.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_ENTER){
+                        focusManager.clearFocus()
+                        return@onKeyEvent true
+                    }
+                    return@onKeyEvent false
+                }
         )
 
         Button(
@@ -112,11 +132,13 @@ fun BottomContentLogin(navController: NavController) {
                             showCircularIndicator = false
                             showDialog = true
                             message = messageEmail
+                            focusManager.moveFocus(FocusDirection.Up)
                         }
                     }
                 } else {
                     message = "El correo electrónico no es válido"
                     showDialog = true
+                    focusManager.moveFocus(FocusDirection.Up)
                 }
             },
             modifier = Modifier

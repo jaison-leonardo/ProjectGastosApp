@@ -14,6 +14,7 @@ fun createAccount(dataUser: DataUser, pinValue: String, callback: (Boolean, Stri
                 val userUid = createAuth.result?.user?.uid
                 if (userUid != null) {
                     val bd = Firebase.database.reference
+                    dataUser.id = userUid
                     bd.child(Objects.USUARIOS.label).child(userUid).setValue(dataUser)
                         .addOnCompleteListener { createDatauser ->
                             if (createDatauser.isSuccessful) {

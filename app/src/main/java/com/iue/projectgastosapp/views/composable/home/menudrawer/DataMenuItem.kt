@@ -101,6 +101,13 @@ fun getDrawerItems(): List<MenuItem> {
             screen = { _, dataUser -> BudgetScreen(dataUser) }
         ),
         MenuItem(
+            id = "ahorro",
+            title = "Metas de ahorro",
+            contentDescription = "go to screen goals",
+            icon = painterResource(id = R.drawable.goals_48),
+            screen = { _, datauser -> SavingsGoalsScreen(datauser) }
+        ),
+        MenuItem(
             id = "reportes",
             title = "Análisis y Reportes",
             contentDescription = "go to screen reports",
@@ -115,25 +122,11 @@ fun getDrawerItems(): List<MenuItem> {
             screen = { _, _ -> NotificationScreen() }
         ),
         MenuItem(
-            id = "ahorro",
-            title = "Metas de ahorro",
-            contentDescription = "go to screen goals",
-            icon = painterResource(id = R.drawable.goals_48),
-            screen = { _, datauser -> SavingsGoalsScreen(datauser) }
-        ),
-        MenuItem(
             id = "seguridad",
             title = "Seguridad y Privacidad",
             contentDescription = "go to screen security",
             icon = painterResource(id = R.drawable.security_48),
             screen = { _, _ -> SecurityScreen() }
-        ),
-        MenuItem(
-            id = "backup",
-            title = "Respaldo de datos",
-            contentDescription = "go to screen backup",
-            icon = painterResource(id = R.drawable.backup_48),
-            screen = { _, _ -> BackupScreen() }
         ),
         MenuItem(
             id = "logout",
