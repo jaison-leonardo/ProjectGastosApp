@@ -28,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.iue.projectgastosapp.utils.formatToCurrency
 
 @Composable
 fun CustomProgressBar(
@@ -35,7 +36,7 @@ fun CustomProgressBar(
     progress: Float,
     totalValue: Double,
     colors: List<Color>
-) {
+){
     var widthBar by remember { mutableStateOf(0) }
     val screenWidth = LocalDensity.current.run {
         LocalConfiguration.current.screenWidthDp.dp.value

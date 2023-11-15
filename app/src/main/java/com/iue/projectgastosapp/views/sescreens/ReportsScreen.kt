@@ -1,6 +1,10 @@
 package com.iue.projectgastosapp.views.sescreens
 
+import android.Manifest
 import android.app.DatePickerDialog
+import android.graphics.BitmapFactory
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -30,18 +34,36 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.lifecycleScope
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
+import com.google.accompanist.permissions.shouldShowRationale
+import com.iue.projectgastosapp.R
 import com.iue.projectgastosapp.enums.Categories
-import com.iue.projectgastosapp.views.composable.CheckboxListColumn
-import com.iue.projectgastosapp.views.composable.OptionCheckItem
+import com.iue.projectgastosapp.firebase.dataobjects.DataUser
+import com.iue.projectgastosapp.firebase.functions.getExpensesByDateRangeAndCategory
+import com.iue.projectgastosapp.utils.generatePDF
+import com.iue.projectgastosapp.utils.getFormattedDate
+import com.iue.projectgastosapp.views.composable.ShowCircularIndicator
+import com.iue.projectgastosapp.views.composable.ShowDialog
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
+@RequiresApi(Build.VERSION_CODES.R)
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun ReportsScreen() {
+fun ReportsScreen(dataUser: DataUser) {
+    val permisoReadState =
+        rememberPermissionState(permission = Manifest.permission.READ_EXTERNAL_STORAGE)
+    val permisoWriteState =
+        rememberPermissionState(permission = Manifest.permission.WRITE_EXTERNAL_STORAGE)
     val dateFormat = remember { SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()) }
     val context = LocalContext.current
     val fechaInicial by remember { mutableStateOf(Calendar.getInstance()) }
@@ -50,11 +72,17 @@ fun ReportsScreen() {
     val fechaFinal by remember { mutableStateOf(Calendar.getInstance()) }
     var isFechaIFinalVisible by remember { mutableStateOf(false) }
 
+    var showDialog by remember { mutableStateOf(false) }
+    var showCircularIndicator by remember { mutableStateOf(false) }
+    var message by remember { mutableStateOf("") }
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+
     val categories = listOf(
-        Categories.ALIMENTACION.label,
-        Categories.TRANSPORTE.label,
-        Categories.ENTRETENIMIENTO.label,
-        Categories.OTROS.label
+        Categories.ALIMENTACION,
+        Categories.TRANSPORTE,
+        Categories.ENTRETENIMIENTO,
+        Categories.OTROS
     )
     LazyColumn(
         modifier = Modifier
@@ -132,32 +160,52 @@ fun ReportsScreen() {
             }
             Spacer(modifier = Modifier.size(30.dp))
         }
-        item {
-            // Categorias
-            Text(text = "Categorias", fontWeight = FontWeight.Bold)
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .border(1.dp, Color.Gray)
-                    .background(MaterialTheme.colorScheme.surface)
-            ) {
-                val options = categories.map { it ->
-                    val checked = remember { mutableStateOf(false) }
-                    OptionCheckItem(
-                        label = it,
-                        checked = checked.value,
-                        onCheckedChange = { checked.value = it }
-                    )
-                }
-                CheckboxListColumn(options = options)
-            }
-            Spacer(modifier = Modifier.size(30.dp))
-        }
         // Botón "Generar Reporte"
         item {
             Button(
                 onClick = {
+                    isFechaIFinalVisible = false
+                    showCircularIndicator = true
+                    lifecycleOwner.lifecycleScope.launch {
+                        permisoWriteState.launchPermissionRequest()
+                        permisoReadState.launchPermissionRequest()
 
+                    }
+                    if (permisoReadState.status.isGranted && permisoWriteState.status.isGranted) {
+                        val dateRangePair = Pair(
+                            getFormattedDate(fechaInicial.time, "yyyy-MM-dd"),
+                            getFormattedDate(fechaFinal.time, "yyyy-MM-dd")
+                        )
+                        getExpensesByDateRangeAndCategory(
+                            dataUser.id,
+                            dateRangePair,
+                            categories
+                        ) { dataMonthList, messageGet ->
+                            showCircularIndicator = false
+                            if (dataMonthList != null) {
+                                val dateStart = getFormattedDate(fechaInicial.time, "dd/MM/yyyy")
+                                val dateEnd = getFormattedDate(fechaFinal.time, "dd/MM/yyyy")
+                                val title = "Reporte de gastos del $dateStart al $dateEnd"
+                                val logoBitmap = BitmapFactory.decodeResource(context.resources, R.drawable.logo_se_64)
+                                generatePDF(context, title, logoBitmap, dataMonthList)
+
+                            } else {
+                                showDialog = true
+                                message = messageGet
+                            }
+                        }
+                    } else if (permisoReadState.status.shouldShowRationale || permisoWriteState.status.shouldShowRationale) {
+                        message =
+                            "Se necesita permisos para generar un reporte, " +
+                                    "para usar esta funcionalidad por favor acepte los permisos"
+                        showDialog = true
+                        permisoWriteState.launchPermissionRequest()
+                        permisoReadState.launchPermissionRequest()
+                    } else {
+                        showDialog = true
+                        message = "No se pudo generar el reporte"
+                    }
+                    showCircularIndicator = false
                 },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1876D0))
@@ -174,12 +222,18 @@ fun ReportsScreen() {
             }
         }
 
-
     }
+    ShowCircularIndicator(show = showCircularIndicator)
+    ShowDialog(
+        show = showDialog,
+        message = message,
+        onDismiss = { showDialog = false },
+        onButtonClick = { showDialog = false }
+    )
 }
 
 @Preview(showBackground = true)
 @Composable
 fun ReportsScreenPreview() {
-    ReportsScreen()
+//    ReportsScreen()
 }

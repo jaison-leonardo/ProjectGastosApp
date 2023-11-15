@@ -1,5 +1,8 @@
 package com.iue.projectgastosapp.utils
 
+import java.text.DateFormatSymbols
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -9,6 +12,20 @@ fun parseMonetaryValue(value: String): Double {
     // Eliminar caracteres no numéricos y el símbolo de moneda
     val cleanValue = value.replace(Regex("[^\\d.]"), "")
     return cleanValue.toDoubleOrNull() ?: 0.0
+}
+
+// Función de ampliación para dar formato a la moneda
+fun Double.formatToCurrency(): String {
+    return String.format("$%,.0f", this)
+}
+
+fun formatToCurrencyCop(amount: Double): String {
+    val decimalFormat = DecimalFormat("$ #,###")
+    val symbols = DecimalFormatSymbols.getInstance()
+
+    decimalFormat.decimalFormatSymbols = symbols
+
+    return decimalFormat.format(amount)
 }
 
 fun getFormattedDate(date: Date, format: String): String {
@@ -56,3 +73,12 @@ fun truncateTimeFromDate(date: Date): Date {
     }
     return calendar.time
 }
+
+fun getMonthNameByDate(date: String): String {
+    val dateObj = getDateObjFromString(date, "yyyy-MM-dd")
+    val symbols = DateFormatSymbols(Locale("es", "ES"))
+    val calendar = Calendar.getInstance()
+    calendar.time = dateObj
+    return symbols.months[calendar.get(Calendar.MONTH)]
+}
+

@@ -43,16 +43,17 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.iue.projectgastosapp.enums.Categories
-import com.iue.projectgastosapp.firebase.functions.createMetaByUser
+import com.iue.projectgastosapp.enums.getCategoryById
 import com.iue.projectgastosapp.firebase.dataobjects.DataMetaAhorro
 import com.iue.projectgastosapp.firebase.dataobjects.DataUser
+import com.iue.projectgastosapp.firebase.functions.createMetaByUser
 import com.iue.projectgastosapp.firebase.functions.getIdByUserAndDate
 import com.iue.projectgastosapp.firebase.functions.getMetasByUser
+import com.iue.projectgastosapp.utils.formatToCurrencyCop
 import com.iue.projectgastosapp.utils.getFormattedDate
 import com.iue.projectgastosapp.utils.getLastDayOfMonth
 import com.iue.projectgastosapp.utils.isDateInRange
 import com.iue.projectgastosapp.utils.parseMonetaryValue
-import com.iue.projectgastosapp.utils.sumarDiasAFecha
 import com.iue.projectgastosapp.utils.truncateTimeFromDate
 import com.iue.projectgastosapp.views.composable.CardExpandable
 import com.iue.projectgastosapp.views.composable.ShowDialog
@@ -218,7 +219,7 @@ fun SavingsGoalsScreen(dataUser: DataUser) {
                         val validateDate = isDateInRange(fechaSelect, fechaMin, fechaMax)
                         if (validateFields && validateDate) {
                             for (item in itemsList) {
-                                if (item.categoriaMeta == selectedCategoriaObject.label) {
+                                if (item.categoriaMeta == selectedCategoriaObject.id) {
                                     message =
                                         "Ya existe una meta de ahorro para la categoría seleccionada"
                                     showDialog = true
@@ -287,8 +288,8 @@ fun SavingsGoalsScreen(dataUser: DataUser) {
         }
         items(items = itemsList, itemContent = { item ->
             CardExpandable(
-                title = item.categoriaMeta,
-                content = "\tMeta: ${item.montoMeta} \n\tFecha límite: ${item.fechaLimite}"
+                title = getCategoryById(item.categoriaMeta)!!.label,
+                content = "\tMeta: ${formatToCurrencyCop(item.montoMeta)} \n\tFecha límite: ${item.fechaLimite}"
             )
         })
     }

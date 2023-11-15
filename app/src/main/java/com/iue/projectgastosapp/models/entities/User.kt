@@ -1,6 +1,5 @@
 package com.iue.projectgastosapp.models.entities
 
-import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 

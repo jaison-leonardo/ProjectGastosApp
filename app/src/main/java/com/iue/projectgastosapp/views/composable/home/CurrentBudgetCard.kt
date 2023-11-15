@@ -19,45 +19,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.iue.projectgastosapp.firebase.dataobjects.DataPresupuesto
-import com.iue.projectgastosapp.firebase.dataobjects.DataUser
-import com.iue.projectgastosapp.firebase.functions.getBudgetByUserAndDate
-import com.iue.projectgastosapp.firebase.functions.getMetasByUser
-import com.iue.projectgastosapp.views.composable.ShowDialog
-import java.util.Date
+import com.iue.projectgastosapp.utils.formatToCurrency
+import com.iue.projectgastosapp.viewmodel.DataModelHome
 
 @Composable
-fun CurrentBudgetCard(dataUser: DataUser) {
-    var presupuesto by remember {
-        mutableStateOf(
-            DataPresupuesto(0.0, 0.0, 0.0, 0.0, "")
-        )
-    }
-    var showPresupuesto by remember { mutableStateOf(false) }
+fun CurrentBudgetCard(viewModel: DataModelHome) {
     var totalPresupuesto by remember { mutableStateOf(0.0) }
-    var showDialog by remember { mutableStateOf(false) }
-    var message by remember { mutableStateOf("") }
-    var totalMeta by remember { mutableStateOf(0.0) }
-    getBudgetByUserAndDate(dataUser.id, Date()) { presupuestoData, messagePresupuesto ->
-        if (presupuestoData != null) {
-            showPresupuesto = true
-            presupuesto = presupuestoData
-        } else {
-            showDialog = true
-            message = messagePresupuesto
-        }
-    }
-    getMetasByUser(dataUser.id) { metaList, messageMetas ->
-        if (metaList != null) {
-            metaList.forEach {
-                totalMeta += it.montoMeta
-            }
-        } else {
-            showDialog = true
-            message = messageMetas
-        }
-
-    }
     Column(
         verticalArrangement = Arrangement.spacedBy(1.dp),
     ) {
@@ -79,37 +46,21 @@ fun CurrentBudgetCard(dataUser: DataUser) {
                     .padding(16.dp)
                     .fillMaxWidth()
             ) {
-                totalPresupuesto = if (showPresupuesto) {
-                    ExpenseItem("Alimentación", presupuesto.alimentacion)
-                    ExpenseItem("Transporte", presupuesto.transporte)
-                    ExpenseItem("Entretenimiento", presupuesto.entretenimiento)
-                    ExpenseItem("Otros", presupuesto.otros)
-                    presupuesto.alimentacion + presupuesto.transporte + presupuesto.entretenimiento + presupuesto.otros
-                } else {
-                    ExpenseItem("Alimentación", 0.0)
-                    ExpenseItem("Transporte", 0.0)
-                    ExpenseItem("Entretenimiento", 0.0)
-                    ExpenseItem("Otros", 0.0)
-                    0.0
-                }
-
-
+                ExpenseItem("Alimentación", viewModel.presupuesto.alimentacion)
+                ExpenseItem("Transporte", viewModel.presupuesto.transporte)
+                ExpenseItem("Entretenimiento", viewModel.presupuesto.entretenimiento)
+                ExpenseItem("Otros", viewModel.presupuesto.otros)
+                totalPresupuesto =
+                    viewModel.presupuesto.alimentacion + viewModel.presupuesto.transporte + viewModel.presupuesto.entretenimiento + viewModel.presupuesto.otros
                 Divider(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 8.dp)
                 )
-
-                TotalRow(totalMeta, totalPresupuesto)
+                TotalRow(viewModel.totalMeta, totalPresupuesto)
             }
         }
     }
-    ShowDialog(
-        show = showDialog,
-        message = message,
-        onDismiss = { showDialog = false },
-        onButtonClick = { showDialog = false }
-    )
 }
 
 @Composable
@@ -146,7 +97,3 @@ fun ExpenseItem(name: String, amount: Double) {
     }
 }
 
-// Extension function to format currency
-fun Double.formatToCurrency(): String {
-    return String.format("$%,.0f", this)
-}

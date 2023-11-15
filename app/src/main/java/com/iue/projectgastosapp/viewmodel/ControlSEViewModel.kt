@@ -4,8 +4,6 @@ import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.iue.projectgastosapp.models.entities.Gasto
@@ -13,7 +11,6 @@ import com.iue.projectgastosapp.models.entities.User
 import com.iue.projectgastosapp.models.relationship.GastoAndCategoria
 import com.iue.projectgastosapp.room.dataobjects.GastoDao
 import com.iue.projectgastosapp.room.dataobjects.UserDao
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 

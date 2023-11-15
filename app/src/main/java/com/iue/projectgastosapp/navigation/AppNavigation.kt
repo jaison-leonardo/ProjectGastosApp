@@ -1,5 +1,7 @@
 package com.iue.projectgastosapp.navigation
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavType
@@ -9,13 +11,14 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.iue.projectgastosapp.R
 import com.iue.projectgastosapp.firebase.dataobjects.DataUser
-import com.iue.projectgastosapp.views.sescreens.MenuDrawerScreen
+import com.iue.projectgastosapp.views.sescreens.MenuHomeScreen
 import com.iue.projectgastosapp.views.startscreens.CreatePinScreen
 import com.iue.projectgastosapp.views.startscreens.LoginPinScreen
 import com.iue.projectgastosapp.views.startscreens.LoginScreen
 import com.iue.projectgastosapp.views.startscreens.RegisterScreen
 import com.iue.projectgastosapp.views.startscreens.SplashScreen
 
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
@@ -78,7 +81,7 @@ fun AppNavigation() {
             val lastName = backStackEntry.arguments?.getString("lastName")
             val email = backStackEntry.arguments?.getString("email")
             val profileImage = painterResource(id = R.drawable.logo)
-            MenuDrawerScreen(
+            MenuHomeScreen(
                 profileImage,
                 navController,
                 DataUser(id!!, name!!, lastName!!, email!!)

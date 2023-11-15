@@ -20,7 +20,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.iue.projectgastosapp.views.composable.IndeterminateCircularIndicator
 
 @Composable
 fun BackupScreen() {
@@ -42,16 +41,6 @@ fun BackupScreen() {
                     contentDescription = null,
                     tint = Color.White
                 )
-            }
-        }
-        if (isLoading) {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally
-            ) {
-                Spacer(modifier = Modifier.size(20.dp))
-//                LoadingAnimation()
-                IndeterminateCircularIndicator()
             }
         }
     }

@@ -6,7 +6,6 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import com.iue.projectgastosapp.enums.Objects
-import com.iue.projectgastosapp.enums.getCategoryById
 import com.iue.projectgastosapp.firebase.dataobjects.DataMetaAhorro
 import com.iue.projectgastosapp.utils.getDateObjFromString
 import com.iue.projectgastosapp.utils.getFirstDayOfMonth
@@ -35,9 +34,8 @@ fun getMetasByUser(idUser: String, callback: (ArrayList<DataMetaAhorro>?, String
                             .filter { it.key != "fechaMes" }
                             .mapTo(metasList) { item ->
                                 val id = item.child("categoriaMeta").value.toString()
-                                val categoriaMeta = getCategoryById(id)?.label
                                 DataMetaAhorro(
-                                    categoriaMeta = categoriaMeta!!,
+                                    categoriaMeta = id,
                                     montoMeta = item.child("montoMeta").value.toString().toDouble(),
                                     fechaLimite = item.child("fechaLimite").value.toString()
                                 )

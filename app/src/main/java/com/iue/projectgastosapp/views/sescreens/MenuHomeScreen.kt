@@ -1,6 +1,8 @@
 package com.iue.projectgastosapp.views.sescreens
 
 import android.annotation.SuppressLint
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -12,11 +14,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -42,11 +44,12 @@ import kotlinx.coroutines.launch
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
-fun MenuDrawerScreen(
+fun MenuHomeScreen(
     profileImage: Painter,
     navController: NavHostController,
-    dataUser: DataUser,
+    dataUser: DataUser
 ) {
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -91,7 +94,7 @@ fun MenuDrawerScreen(
             Scaffold(
                 floatingActionButton = {
                     if (isFabVisible) {
-                        SmallFloatingActionButton(
+                        FloatingActionButton(
                             onClick = {
                                 isFloatingButtonClick = true
                             },

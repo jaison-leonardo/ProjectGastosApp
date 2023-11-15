@@ -1,5 +1,7 @@
 package com.iue.projectgastosapp.views.composable.home.menudrawer
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
@@ -21,11 +23,9 @@ import androidx.navigation.NavHostController
 import com.iue.projectgastosapp.R
 import com.iue.projectgastosapp.firebase.dataobjects.DataUser
 import com.iue.projectgastosapp.navigation.Routes
-import com.iue.projectgastosapp.views.sescreens.BackupScreen
 import com.iue.projectgastosapp.views.sescreens.BudgetScreen
 import com.iue.projectgastosapp.views.sescreens.ExpensesScreen
 import com.iue.projectgastosapp.views.sescreens.HomeScreen
-import com.iue.projectgastosapp.views.sescreens.NotificationScreen
 import com.iue.projectgastosapp.views.sescreens.ReportsScreen
 import com.iue.projectgastosapp.views.sescreens.SavingsGoalsScreen
 import com.iue.projectgastosapp.views.sescreens.SecurityScreen
@@ -76,6 +76,7 @@ fun NavigationListItem(
 }
 
 
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
 fun getDrawerItems(): List<MenuItem> {
     return listOf(
@@ -112,14 +113,7 @@ fun getDrawerItems(): List<MenuItem> {
             title = "Análisis y Reportes",
             contentDescription = "go to screen reports",
             icon = painterResource(id = R.drawable.report_48),
-            screen = { _, _ -> ReportsScreen() }
-        ),
-        MenuItem(
-            id = "notificaciones",
-            title = "Notificaciones y Alertas",
-            contentDescription = "go to screen notifications",
-            icon = painterResource(id = R.drawable.notifications_48),
-            screen = { _, _ -> NotificationScreen() }
+            screen = { _, datauser -> ReportsScreen(datauser) }
         ),
         MenuItem(
             id = "seguridad",
@@ -140,6 +134,7 @@ fun getDrawerItems(): List<MenuItem> {
     )
 }
 
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
 fun getMenuItemById(id: String): MenuItem {
     return getDrawerItems().find { it.id == id }!!

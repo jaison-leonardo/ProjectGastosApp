@@ -40,7 +40,6 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -57,7 +56,7 @@ import com.iue.projectgastosapp.firebase.functions.getBudgetByUserAndDate
 import com.iue.projectgastosapp.firebase.functions.getGastosByUser
 import com.iue.projectgastosapp.firebase.functions.getIdObjectByUser
 import com.iue.projectgastosapp.firebase.functions.getMetasByUser
-import com.iue.projectgastosapp.firebase.functions.getSumatoriaGastosByCategoria
+import com.iue.projectgastosapp.firebase.functions.getSumatoriaGastosByDateAndCategoria
 import com.iue.projectgastosapp.utils.getFormattedDate
 import com.iue.projectgastosapp.utils.parseMonetaryValue
 import com.iue.projectgastosapp.views.composable.ShowDialog
@@ -80,7 +79,6 @@ fun ExpensesScreen(dataUser: DataUser) {
         )
     var isFocused by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
-    val focusManager = LocalFocusManager.current
     var expanded by remember { mutableStateOf(false) }
     var selectedCategory by remember { mutableStateOf(categoriesList[0].label) }
     var selectedCategoriaObject by remember { mutableStateOf(Categories.EMPTY) }
@@ -125,7 +123,7 @@ fun ExpensesScreen(dataUser: DataUser) {
             Categories.ENTRETENIMIENTO,
             Categories.OTROS
         )
-        getSumatoriaGastosByCategoria(dataUser.id, categorias) { sumatoria, messageCat ->
+        getSumatoriaGastosByDateAndCategoria(dataUser.id, categorias) { sumatoria, messageCat ->
             if (sumatoria != null) {
                 gastosPorCategoria = sumatoria
             } else {
@@ -225,7 +223,6 @@ fun ExpensesScreen(dataUser: DataUser) {
                     fechaGasto.set(year, month, dayOfMonth)
                     isDatePickerDialogVisible = false
                 }
-            focusManager.clearFocus()
             DatePickerDialog(
                 context,
                 onDateSetListener,
@@ -289,7 +286,7 @@ fun ExpensesScreen(dataUser: DataUser) {
                         showDialog = true
                     }
                     if (createGasto) {
-                        getIdObjectByUser(dataUser.id, "gastos") { idGasto, responseId ->
+                        getIdObjectByUser(dataUser.id, "Gastos") { idGasto, responseId ->
                             if (idGasto != null) {
                                 createGastoByUser(
                                     dataUser.id,
