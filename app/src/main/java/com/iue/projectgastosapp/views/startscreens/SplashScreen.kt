@@ -18,12 +18,18 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.iue.projectgastosapp.R
 import com.iue.projectgastosapp.navigation.Routes
+import com.iue.projectgastosapp.room.PreferenceDatastore
+import com.iue.projectgastosapp.room.PreferencesData
 import com.iue.projectgastosapp.ui.theme.BackgroundColor
 import kotlinx.coroutines.delay
 
 @Composable
 fun SplashScreen(navController: NavController) {
+//    val context = LocalContext.current
+//    val preferencesData = PreferenceDatastore(context)
     LaunchedEffect(key1 = true) {
+//        val preferences = PreferencesData()
+//        preferencesData.saveData(preferences)
         delay(1000)
         navController.popBackStack()
         navController.navigate(Routes.LoginScreen.route)

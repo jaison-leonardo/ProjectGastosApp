@@ -164,7 +164,6 @@ fun ReportsScreen(dataUser: DataUser) {
         item {
             Button(
                 onClick = {
-                    isFechaIFinalVisible = false
                     showCircularIndicator = true
                     lifecycleOwner.lifecycleScope.launch {
                         permisoWriteState.launchPermissionRequest()

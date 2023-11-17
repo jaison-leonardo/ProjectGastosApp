@@ -64,7 +64,6 @@ fun SecurityScreen() {
                 .align(Alignment.CenterHorizontally),
             checked = checked,
             onCheckedChange = {
-                showDialog = false
                 checked = it
                 lifecycleOwner.lifecycleScope.launch {
                     preferencesData.getData().collect {
